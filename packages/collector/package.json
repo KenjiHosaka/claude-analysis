@@ -1,0 +1,22 @@
+{
+  "name": "@claude-analysis/collector",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "bin": { "claude-analysis-collector": "./dist/index.js" },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@claude-analysis/shared": "workspace:*",
+    "commander": "^13",
+    "glob": "^11"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "tsup": "^8",
+    "tsx": "^4",
+    "typescript": "^5.7"
+  }
+}
