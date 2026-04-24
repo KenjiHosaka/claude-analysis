@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardHeader,
@@ -93,9 +93,8 @@ export function SkillHeatmap({ data }: SkillHeatmapProps) {
 
             {/* Skill rows */}
             {data.skills.map((skill) => (
-              <>
+              <React.Fragment key={skill}>
                 <div
-                  key={`label-${skill}`}
                   className="sticky left-0 z-10 flex items-center bg-card pr-2 text-sm font-medium truncate"
                 >
                   {skill}
@@ -124,7 +123,7 @@ export function SkillHeatmap({ data }: SkillHeatmapProps) {
                     </div>
                   );
                 })}
-              </>
+              </React.Fragment>
             ))}
           </div>
 

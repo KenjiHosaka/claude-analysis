@@ -104,27 +104,24 @@ export async function getPrKpi(
   const prsWithSkillsRate =
     totalPrCount > 0 ? (prsWithSkills / totalPrCount) * 100 : 0;
 
-  // Average distinct skills per PR
-  const avgRows = await db
+  // Average distinct skills per PR — compute in JS to avoid subquery param binding issues
+  const perPrSkills = await db
     .select({
-      value:
-        sql<number>`AVG(sub.skill_count)`.as("avg_skills"),
+      prId: pullRequests.id,
+      skillCount: countDistinct(skillUsages.skillName).as("skill_count"),
     })
-    .from(
-      sql`(
-        SELECT ${pullRequests.id} AS pr_id,
-               COUNT(DISTINCT ${skillUsages.skillName}) AS skill_count
-        FROM ${pullRequests}
-        INNER JOIN ${repositories} ON ${pullRequests.repositoryId} = ${repositories.id}
-        LEFT JOIN ${prSessions} ON ${prSessions.pullRequestId} = ${pullRequests.id}
-        LEFT JOIN ${sessions} ON ${prSessions.sessionId} = ${sessions.id}
-        LEFT JOIN ${skillUsages} ON ${skillUsages.sessionId} = ${sessions.id}
-        WHERE ${pullRequests.createdAt} BETWEEN ${from} AND ${to}
-        ${repoCondition ? sql`AND ${repoCondition}` : sql``}
-        GROUP BY ${pullRequests.id}
-      ) AS sub`,
-    );
-  const avgSkillsPerPr = Number(avgRows[0]?.value ?? 0);
+    .from(pullRequests)
+    .innerJoin(repositories, eq(pullRequests.repositoryId, repositories.id))
+    .leftJoin(prSessions, eq(prSessions.pullRequestId, pullRequests.id))
+    .leftJoin(sessions, eq(prSessions.sessionId, sessions.id))
+    .leftJoin(skillUsages, eq(skillUsages.sessionId, sessions.id))
+    .where(and(between(pullRequests.createdAt, from, to), repoCondition))
+    .groupBy(pullRequests.id);
+
+  const avgSkillsPerPr =
+    perPrSkills.length > 0
+      ? perPrSkills.reduce((sum, r) => sum + r.skillCount, 0) / perPrSkills.length
+      : 0;
 
   return { totalPrCount, prsWithSkillsRate, avgSkillsPerPr };
 }
