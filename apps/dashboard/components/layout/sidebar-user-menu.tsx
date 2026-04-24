@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Settings } from "lucide-react";
-import { auth, signOut } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -37,7 +37,8 @@ export async function SidebarUserMenu() {
       <form
         action={async () => {
           "use server";
-          await signOut({ redirectTo: "/login" });
+          const { signOut } = await import("@/lib/auth");
+          await signOut();
         }}
       >
         <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground" type="submit">

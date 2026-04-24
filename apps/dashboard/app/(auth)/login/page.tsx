@@ -1,6 +1,13 @@
+import { redirect } from "next/navigation";
 import { signIn } from "@/lib/auth";
 
+const DEV_MODE = !process.env.AUTH_GITHUB_ID;
+
 export default function LoginPage() {
+  if (DEV_MODE) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="text-center space-y-6">
